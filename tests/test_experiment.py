@@ -35,6 +35,17 @@ def test_holm_adjustment():
     assert (adj >= p).all()
 
 
+def test_balance_table_handles_string_dtype_covariates():
+    df = pd.DataFrame({
+        "variant": ["treatment", "control", "treatment", "control"],
+        "city_tier": pd.Series(["Metro", "Tier 1", "Tier 2", "Metro"], dtype="string"),
+        "pre_upi_txn_28d": [1.0, 2.0, 3.0, 4.0],
+    })
+    out = X.balance_table(df, ["city_tier", "pre_upi_txn_28d"])
+    assert "pre_upi_txn_28d" in out.covariate.values
+    assert any(c.startswith("city_tier_") for c in out.covariate.values)
+
+
 def test_cuped_reduces_variance_and_keeps_effect():
     rng = np.random.default_rng(0)
     x = rng.normal(10, 3, 20_000)
