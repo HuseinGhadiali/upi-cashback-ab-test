@@ -50,7 +50,7 @@ def balance_table(df: pd.DataFrame, covariates: list[str], arm: str = "variant")
     t, c = df[df[arm] == "treatment"], df[df[arm] == "control"]
     rows = []
     for col in covariates:
-        x = pd.get_dummies(df[col], prefix=col, dtype=float) if df[col].dtype == object else df[[col]].astype(float)
+        x = df[[col]].astype(float) if pd.api.types.is_numeric_dtype(df[col]) else pd.get_dummies(df[col], prefix=col, dtype=float)
         for k in x.columns:
             mt, mc = x.loc[t.index, k].mean(), x.loc[c.index, k].mean()
             sd = np.sqrt((x.loc[t.index, k].var() + x.loc[c.index, k].var()) / 2)
