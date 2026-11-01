@@ -54,6 +54,17 @@ def test_bootstrap_ci_covers_difference():
     assert lo < t.mean() - c.mean() < hi
 
 
+def test_balance_table_handles_pandas_string_dtype():
+    df = pd.DataFrame({
+        "variant": ["treatment", "treatment", "control", "control"],
+        "city_tier": pd.Series(["Metro", "Tier 1", "Metro", "Tier 1"], dtype="string"),
+        "pre_upi_txn_28d": [3, 4, 3, 4],
+    })
+    out = X.balance_table(df, ["city_tier", "pre_upi_txn_28d"])
+    assert "city_tier_Metro" in out.covariate.values
+    assert "city_tier_Tier 1" in out.covariate.values
+
+
 def test_generated_experiment_end_to_end(tmp_path):
     for k, v in generate(seed=3, n_users=30_000).items():
         v.to_csv(tmp_path / f"{k}.csv", index=False)
